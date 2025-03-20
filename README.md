@@ -3,7 +3,7 @@
 ## Project Title: **Freelancing Platform**
 
 ## Project Idea:
-A **commission-free freelancing platform** that connects recruiters with freelancers directly. Unlike traditional freelancing platforms that charge high commissions and allow random reviews, this platform ensures **fair payments, verified reviews, and AI-based rating for freshers**. It is designed to provide a **transparent, secure, and instant payment system** for freelancers.
+A **commission-free freelancing platform** that connects recruiters with freelancers directly like p2p. Unlike traditional freelancing platforms that charge high commissions and allow random reviews, this platform ensures **fair payments, verified reviews, and AI-based rating for freshers**. It is designed to provide a **transparent, secure, and instant payment system** for freelancers.
 
 ## Key Features:
 - **No Commissions:** Freelancers receive full payment directly.
