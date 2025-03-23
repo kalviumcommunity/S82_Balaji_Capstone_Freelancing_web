@@ -3,7 +3,7 @@
 ## Project Title: **Freelancing Platform**
 
 ## Project Idea:
-A **commission-free freelancing platform** that connects recruiters with freelancers directly like p2p. Unlike traditional freelancing platforms that charge high commissions and allow random reviews, this platform ensures **fair payments, verified reviews, and AI-based rating for freshers**. It is designed to provide a **transparent, secure, and instant payment system** for freelancers.
+A **commission-free ai freelancing platform** that connects recruiters with freelancers directly like p2p. Unlike traditional freelancing platforms that charge high commissions and allow random reviews, this platform ensures **fair payments, verified reviews, and AI-based rating for freshers**. It is designed to provide a **transparent, secure, and instant payment system** for freelancers.
 
 ## Key Features:
 - **No Commissions:** Freelancers receive full payment directly.
@@ -14,18 +14,18 @@ A **commission-free freelancing platform** that connects recruiters with freelan
 - **User Authentication:** Signup & Login system with JWT/OAuth.
 
 ## Tech Stack:
-- **Frontend:** React.js / Next.js
+- **Frontend:** React.js 
 - **Backend:** Node.js + Express.js
-- **Database:** MongoDB / PostgreSQL
-- **Authentication:** JWT / OAuth
-- **Payment Gateway:** Razorpay / Stripe
+- **Database:** MongoDB
+- **Authentication:** JWT &&  OAuth
+- **Payment Gateway:** Razorpay
 
 ---
 
 ## **Day-by-Day Plan (Capstone Journey - 30 Days)**
 
 ### **Week 1 - Frontend & Backend Setup (Parallel Development)**
-- **Day 1:** Set up React.js/Next.js with TailwindCSS & initialize backend with Express.js.
+- **Day 1:** Set up React.js & initialize backend with Express.js.
 - **Day 2:** Create **Signup & Login UI (Frontend)** and build **Authentication API (Backend)**.
 - **Day 3:** Develop **Freelancer Dashboard UI** and set up **User Authentication & Role-based Access (Backend)**.
 - **Day 4:** Develop **Recruiter Dashboard UI** and implement **User Role Permissions (Backend)**.
