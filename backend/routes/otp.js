@@ -23,6 +23,7 @@ router.post('/send-otp', async (req, res) => {
 
   const otp = otpGenerator.generate(6, {
     digits: true,
+    
     upperCaseAlphabets: false,
     specialChars: false,
   });
