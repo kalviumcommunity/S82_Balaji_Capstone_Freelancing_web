@@ -11,10 +11,16 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.8.4",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mogoose": "^0.0.1-security",
-    "nodemon": "^3.1.9"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "nodemailer": "^6.10.0",
+    "nodemon": "^3.1.9",
+    "otp-generator": "^4.0.1"
   }
 }

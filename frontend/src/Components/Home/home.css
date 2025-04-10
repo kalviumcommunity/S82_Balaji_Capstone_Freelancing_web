@@ -1,0 +1,120 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f0f0f;
+    color: #ffffff;
+  }
+  
+  .home-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .navbar {
+    background-color: #1a1a1a;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #00bcd4;
+  }
+  
+  .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #00bcd4;
+  }
+  
+  .logo span {
+    color: #00ffff;
+  }
+  
+  .navbar nav a {
+    color: #e0e0e0;
+    margin-left: 1.5rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .navbar nav a:hover {
+    color: #00e5ff;
+  }
+  
+  .join-btn {
+    background: linear-gradient(to right, #007c91, #00bcd4);
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    color: black;
+    font-weight: bold;
+  }
+  
+  .hero-section {
+    text-align: center;
+    padding: 5rem 2rem;
+    background: radial-gradient(circle at center, #111 0%, #000 100%);
+  }
+  
+  .hero-section h2 {
+    color: #00bcd4;
+  }
+  
+  .hero-section input {
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+    width: 60%;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #121212;
+    color: #fff;
+    font-size: 1rem;
+  }
+  
+  .hero-section input:focus {
+    border-color: #00bcd4;
+    outline: none;
+    background-color: #1a1a1a;
+  }
+  
+  .categories {
+    padding: 2rem;
+  }
+  
+  .categories h3 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #00bcd4;
+  }
+  
+  .category-list {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .category-card {
+    flex: 1;
+    min-width: 150px;
+    background-color: #1f1f1f;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #00bcd4;
+    transition: 0.2s;
+    color: #ccc;
+  }
+  
+  .category-card:hover {
+    border-color: #00e5ff;
+    color: #00e5ff;
+  }
+  
+  .footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #1a1a1a;
+    border-top: 1px solid #00bcd4;
+    margin-top: auto;
+  }
+  
