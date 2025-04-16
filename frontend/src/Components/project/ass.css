@@ -1,0 +1,32 @@
+.project-card {
+  cursor: pointer;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover {
+  transform: scale(1.05);
+}
+
+.project-card.selected {
+  border-color: #007bff;
+  background-color: #6399c9;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.success {
+  color: green;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}

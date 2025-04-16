@@ -1,119 +1,106 @@
 import React, { useState } from 'react';
 import './login.css';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
 
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState(1); // 1 = credentials, 2 = otp
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
-      // Step 1: Send OTP after credentials are entered
-      const res = await fetch('http://localhost:5888/send-otp', {
+      const res = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify(formData),
       });
+  
+      // Check if the response is valid JSON
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error('Error parsing response JSON:', err);
+        alert('Failed to process the response. Please try again.');
+        return;
+      }
 
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("OTP sent to your email 📩");
-        setOtpSent(true);
-        setStep(2);
+      if (!res.ok) {
+        alert(data.error || 'Login failed');
+        return;
+      }
+  
+      // Save token in sessionStorage
+     // sessionStorage.setItem('token', data.token);
+  
+      // Fetch user data using token
+      // const userRes = await fetch('http://localhost:5000/api/user', {
+      //   headers: { Authorization: `Bearer ${data.token}` },
+      // });
+  
+      if (!userRes.ok) {
+        alert('Failed to fetch user data');
+        return;
+      }
+  
+      // const user = await userRes.json();
+  
+      // Check if user is a freelancer
+      if (user.role === 'freelancer') {
+        if (user.assignedProject && user.assignedProject.status === 'passed') {
+          // Redirect to freelancer dashboard if project status is 'passed'
+          navigate('/freelancer-dashboard');
+        } else {
+          // Otherwise, redirect to submission page
+          navigate('/submission');
+        }
+      } else if (user.role === 'recruiter') {
+        // Redirect to recruiter dashboard if role is 'recruiter'
+        navigate('/recruiter-dashboard');
       } else {
-        alert(data.message || "Failed to send OTP");
+        // If the role is neither freelancer nor recruiter
+        alert('Unknown role');
       }
     } catch (err) {
-      console.error("Error:", err);
-      alert("Something went wrong while sending OTP");
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await fetch('http://localhost:5888/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, otp }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("OTP Verified! 🎉 You are logged in.");
-        // Redirect to dashboard or store JWT here
-      } else {
-        alert(data.message || "Invalid OTP");
-      }
-    } catch (err) {
-      console.error("OTP Verification Error:", err);
-      alert("Something went wrong");
+      console.error('Login error:', err);
+      alert('Something went wrong');
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
+    <div className="auth-wrapper">
+      <div className="auth-card">
         <h2>Welcome Back</h2>
-        <p>Login to your account</p>
+        <form onSubmit={handleLogin} className="auth-form">
+          <input
+            name="email"
+            type="email"
+            placeholder="Email Address"
+            onChange={handleChange}
+            required
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            onChange={handleChange}
+            required
+          />
+          <button type="submit">Log In</button>
+        </form>
 
-        {step === 1 && (
-          <form onSubmit={handleLogin} className="login-form">
-            <label>Email Address</label>
-            <input
-              type="email"
-              required
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
+        <p className="auth-footer">
+          <a href="/forgot-password">Forgot Password?</a>
+        </p>
 
-            <label>Password</label>
-            <input
-              type="password"
-              required
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-            />
-
-            <button type="submit" className="login-btn">
-              Send OTP
-            </button>
-          </form>
-        )}
-
-        {step === 2 && (
-          <form onSubmit={handleVerifyOtp} className="otp-form">
-            <label>Enter OTP</label>
-            <input
-              type="text"
-              required
-              maxLength={6}
-              placeholder="123456"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-            />
-
-            <button type="submit" className="login-btn">
-              Verify OTP & Login
-            </button>
-          </form>
-        )}
+        <p className="auth-footer">
+          New to the platform? <a href="/signup">Join Now</a>
+        </p>
       </div>
     </div>
   );

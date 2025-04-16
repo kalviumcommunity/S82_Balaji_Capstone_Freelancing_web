@@ -5,7 +5,7 @@ function Home() {
   return (
     <div className="home-container">
       <header className="navbar">
-        <h1 className="logo">freelance<span>.</span></h1>
+        <h1 className="logo">KLance</h1>
         <nav>
           <a href="/">Home</a>
           <a href="/explore">Explore</a>
@@ -15,17 +15,17 @@ function Home() {
       </header>
 
       <section className="hero-section">
-        <h2>Find the perfect freelancer for your project</h2>
-        <input type="text" placeholder="Search for services..." />
+        <h2>Find the perfect full-stack web developer for your project</h2>
+        <input type="text" placeholder="Search for full-stack developers..." />
       </section>
 
       <section className="categories">
-        <h3>Popular Categories</h3>
+        <h3>Popular Full-Stack Development Categories</h3>
         <div className="category-list">
-          <div className="category-card">Web Development</div>
-          <div className="category-card">Graphic Design</div>
-          <div className="category-card">Marketing</div>
-          <div className="category-card">Video Editing</div>
+          <div className="category-card">React & Node.js</div>
+          <div className="category-card">MERN Stack</div>
+          <div className="category-card">LAMP Stack</div>
+          <div className="category-card">JavaScript Frameworks</div>
         </div>
       </section>
 
