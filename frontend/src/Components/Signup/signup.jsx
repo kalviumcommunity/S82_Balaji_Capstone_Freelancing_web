@@ -16,6 +16,7 @@ function Signup() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  
   const handleSignup = async (e) => {
     e.preventDefault();
     console.log("Signup initiated with:", formData);
@@ -34,9 +35,7 @@ function Signup() {
   
       if (res.ok) {
         alert('Signup successful!');
-        localStorage.setItem('token', data.token); // Store the token from the response
-        localStorage.setItem('userEmail', formData.email);
-  
+        
         // Redirect based on role
         if (formData.role === 'freelancer') {
           navigate('/assignment');  // Redirect to assignment page if freelancer

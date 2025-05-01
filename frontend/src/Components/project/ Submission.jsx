@@ -8,21 +8,10 @@ function SubmissionPage() {
   const [zipFile, setZipFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
     const fetchProject = async () => {
-      if (!token) {
-        console.error('❌ No token found in localStorage');
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const res = await fetch('http://localhost:5000/api/assigned-project', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const res = await fetch('http://localhost:5000/api/assigned-project');
         if (!res.ok) {
           const errorText = await res.text();
           throw new Error(`❌ Status ${res.status}: ${errorText}`);
@@ -44,7 +33,7 @@ function SubmissionPage() {
     };
 
     fetchProject();
-  }, [token]);
+  }, []);
 
   const startTimer = (deadlineDate) => {
     const endTime = new Date(deadlineDate).getTime();
@@ -79,7 +68,6 @@ function SubmissionPage() {
     try {
       const res = await fetch('http://localhost:5000/api/submit-project', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
@@ -87,46 +75,42 @@ function SubmissionPage() {
 
       if (!res.ok) throw new Error(data.message || 'Submission failed');
 
-      alert('✅ Project submitted successfully!');
-    } catch (err) {
-      console.error('❌ Submission failed:', err.message);
-      alert('❌ Submission failed');
+      alert('Project submitted successfully');
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Error during submission: ' + error.message);
     }
   };
 
+  if (isLoading) {
+    return <p>Loading your assigned project...</p>;
+  }
+
   return (
     <div className="submission-container">
-      {isLoading ? (
-        <div className="loading-spinner">
-          <p>Loading project details...</p>
-          <div className="spinner"></div>
+      <h2>Submit Your {assignedProject.name} Project</h2>
+      <p>Time left to submit: {timeLeft}</p>
+      <div className="submission-options">
+        <div>
+          <label>GitHub Link (Optional)</label>
+          <input
+            type="url"
+            value={githubLink}
+            onChange={(e) => setGithubLink(e.target.value)}
+            placeholder="Enter your GitHub repository link"
+          />
         </div>
-      ) : assignedProject ? (
-        <>
-          <h2>🧪 Submitting: {assignedProject.name}</h2>
-          <p><strong>Deadline:</strong> {new Date(assignedProject.deadline).toLocaleString()}</p>
-          <p className="timer">⏱ Time Left: {timeLeft}</p>
 
-          <div className="upload-section">
-            <label>📁 Upload ZIP file:</label>
-            <input type="file" accept=".zip" onChange={(e) => setZipFile(e.target.files[0])} />
+        <div>
+          <label>Upload ZIP (Optional)</label>
+          <input
+            type="file"
+            onChange={(e) => setZipFile(e.target.files[0])}
+          />
+        </div>
+      </div>
 
-            <label>🔗 GitHub Repository URL:</label>
-            <input
-              type="text"
-              placeholder="https://github.com/username/repo"
-              value={githubLink}
-              onChange={(e) => setGithubLink(e.target.value)}
-            />
-
-            <button className="submit-btn" onClick={handleSubmit}>
-              🚀 Submit Project
-            </button>
-          </div>
-        </>
-      ) : (
-        <p>⚠️ No assigned project found. Please contact the admin.</p>
-      )}
+      <button onClick={handleSubmit}>Submit Project</button>
     </div>
   );
 }

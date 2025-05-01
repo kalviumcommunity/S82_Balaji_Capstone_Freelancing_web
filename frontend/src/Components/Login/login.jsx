@@ -12,14 +12,14 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     try {
       const res = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-  
+
       // Check if the response is valid JSON
       let data;
       try {
@@ -34,37 +34,27 @@ function Login() {
         alert(data.error || 'Login failed');
         return;
       }
-  
-      // Save token in sessionStorage
-     // sessionStorage.setItem('token', data.token);
-  
-      // Fetch user data using token
-      // const userRes = await fetch('http://localhost:5000/api/user', {
-      //   headers: { Authorization: `Bearer ${data.token}` },
-      // });
-  
-      if (!userRes.ok) {
-        alert('Failed to fetch user data');
-        return;
-      }
-  
-      // const user = await userRes.json();
-  
-      // Check if user is a freelancer
-      if (user.role === 'freelancer') {
-        if (user.assignedProject && user.assignedProject.status === 'passed') {
-          // Redirect to freelancer dashboard if project status is 'passed'
-          navigate('/freelancer-dashboard');
+
+      // Check if user exists and if they have the correct role
+      if (data && data.user) {
+        const user = data.user;
+        if (user.role === 'freelancer') {
+          if (user.assignedProject && user.assignedProject.status === 'passed') {
+            // Redirect to freelancer dashboard if project status is 'passed'
+            navigate('/freelancer-dashboard');
+          } else {
+            // Otherwise, redirect to submission page
+            navigate('/submission');
+          }
+        } else if (user.role === 'recruiter') {
+          // Redirect to recruiter dashboard if role is 'recruiter'
+          navigate('/recruiter-dashboard');
         } else {
-          // Otherwise, redirect to submission page
-          navigate('/submission');
+          // If the role is neither freelancer nor recruiter
+          alert('Unknown role');
         }
-      } else if (user.role === 'recruiter') {
-        // Redirect to recruiter dashboard if role is 'recruiter'
-        navigate('/recruiter-dashboard');
       } else {
-        // If the role is neither freelancer nor recruiter
-        alert('Unknown role');
+        alert('Failed to find user data');
       }
     } catch (err) {
       console.error('Login error:', err);

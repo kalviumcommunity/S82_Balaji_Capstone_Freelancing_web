@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ass.css';
 
@@ -8,8 +8,6 @@ function AssignProject() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
-  const userEmail = localStorage.getItem('userEmail');
 
   const projectList = [
     { name: 'Bug Tracker', deadlineDays: 5, description: 'Track bugs with roles, priorities, and comments.' },
@@ -24,9 +22,23 @@ function AssignProject() {
     { name: 'Event Registration System', deadlineDays: 5, description: 'Event management with registration handling.' }
   ];
 
+  // Get userId from localStorage or context (assuming user is already logged in)
+  const userId = localStorage.getItem('userId');  // Ensure you are storing userId after login/signup
+
+  useEffect(() => {
+    if (!userId) {
+      setError('User not logged in');
+    }
+  }, [userId]);
+
   const handleAssignProject = async () => {
     if (!selectedProject) {
       setError('Please select a project');
+      return;
+    }
+
+    if (!userId) {
+      setError('User ID is missing');
       return;
     }
 
@@ -39,16 +51,13 @@ function AssignProject() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          email: userEmail,
+          userId,             // Pass userId to backend
           projectName: selectedProject.name,
         }),
       });
-      
 
-      // Check if the response is OK (status code 200)
       if (!response.ok) {
         const errorResponse = await response.text();  // Get response body as text in case of non-JSON response
         console.error('Error response:', errorResponse);
@@ -56,18 +65,10 @@ function AssignProject() {
         return;
       }
 
-      // Check if response body is empty or not JSON
-      const contentType = response.headers.get('Content-Type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        console.log('Project assigned:', data);
-        setSuccess(true);
-        setTimeout(() => navigate('/submission'), 1500); // Navigate to submission page after successful assignment
-      } else {
-        const errorText = await response.text();
-        console.error('Unexpected response:', errorText);
-        setError('Unexpected error occurred.');
-      }
+      const data = await response.json();
+      console.log('Project assigned:', data);
+      setSuccess(true);
+      setTimeout(() => navigate('/submission'), 1500); // Navigate to submission page after successful assignment
     } catch (error) {
       console.error('Failed to assign project:', error);
       setError('An error occurred while assigning the project');
@@ -78,18 +79,15 @@ function AssignProject() {
 
   return (
     <div className="assignment-container">
-      <h2>🎯 Select Your Evaluation Project</h2>
-      
-      {/* Display Error or Success Messages */}
+      <h2>🎯 Select any one Project</h2>
       {error && <p className="error">{error}</p>}
       {success && <p className="success">Project assigned successfully!</p>}
-
       <div className="project-cards">
         {projectList.map((proj, index) => (
           <div
             className={`project-card ${selectedProject?.name === proj.name ? 'selected' : ''}`}
             key={index}
-            onClick={() => setSelectedProject(proj)} // Allows users to select by clicking on the card
+            onClick={() => setSelectedProject(proj)}
           >
             <h3>{proj.name}</h3>
             <p>{proj.description}</p>
@@ -107,7 +105,6 @@ function AssignProject() {
           </div>
         ))}
       </div>
-
       <button
         className="assign-btn"
         onClick={handleAssignProject}
