@@ -1,18 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth');
 const {
   signup,
   login,
   getUser,
   assignProject,
-  getAssignedProject
+  getAssignedProject,
 } = require('../controllers/authController');
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.get('/user', authMiddleware, getUser);
-router.post('/assign-project', authMiddleware, assignProject);
-router.get('/assigned-project', authMiddleware, getAssignedProject);
+router.get('/user/:userId', getUser);
+router.post('/assign-project', assignProject);
+router.get('/assigned-project/:userId', getAssignedProject);
 
 module.exports = router;

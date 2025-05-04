@@ -1,14 +1,16 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+// const Project = require('../models/project');
 
-// Signup Controller
+
+// Signup
 exports.signup = async (req, res) => {
   try {
     const { name, email, password, occupation } = req.body;
     const existingUser = await User.findOne({ email });
 
-    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+    if (existingUser)
+      return res.status(400).json({ message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -22,7 +24,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-// Login Controller
+// Login
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -33,21 +35,18 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    //   expiresIn: '7d',
-    // });
-res.json({msg:"ok"})
-   // res.json({ token });
+    res.status(200).json({ message: 'Login successful', userId: user._id });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
   }
 };
 
-// Get Logged-In User Info
+// Get User by ID
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('-password');
+    const { userId } = req.params;
+    const user = await User.findById(userId).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     res.json(user);
@@ -57,18 +56,25 @@ exports.getUser = async (req, res) => {
   }
 };
 
-// Assign Project to User
 exports.assignProject = async (req, res) => {
   try {
-    const { projectName } = req.body;
-    const user = await User.findById(req.user.userId);
+    const { userId, projectName } = req.body;
 
+    // Step 1: Find the project by name
+    const project = await Project.findOne({ name: projectName });
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.assignedProject = {
-      name: projectName,
-      assignedAt: new Date(),
-    };
+    // Step 2: Assign only the ObjectId
+    user.assignedProject = project._id;
+
+    // Step 3 (optional): Save deadline date separately if needed
+    const assignedAt = new Date();
+    const deadlineAt = new Date(assignedAt.getTime() + project.deadlineDays * 24 * 60 * 60 * 1000);
+    user.projectDeadline = deadlineAt;
+    user.projectAssignedAt = assignedAt;
 
     await user.save();
 
@@ -79,16 +85,25 @@ exports.assignProject = async (req, res) => {
   }
 };
 
+
 // Get Assigned Project
 exports.getAssignedProject = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).populate('assignedProject');
     if (!user || !user.assignedProject)
       return res.status(404).json({ message: 'No project assigned' });
 
-    res.status(200).json(user.assignedProject);
+    res.status(200).json({
+      assignedProject: user.assignedProject,
+      assignedAt: user.projectAssignedAt,
+      deadlineAt: user.projectDeadline
+    });
   } catch (error) {
     console.error('Get Assigned Project Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+
