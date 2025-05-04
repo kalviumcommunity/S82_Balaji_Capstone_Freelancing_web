@@ -65,7 +65,7 @@ function Login() {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        <h2>Welcome Back</h2>
+        <h2>Welcome Back</h2> 
         <form onSubmit={handleLogin} className="auth-form">
           <input
             name="email"

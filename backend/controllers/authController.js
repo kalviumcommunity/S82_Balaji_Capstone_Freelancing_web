@@ -3,7 +3,6 @@ const User = require('../models/user');
 // const Project = require('../models/project');
 
 
-// Signup
 exports.signup = async (req, res) => {
   try {
     const { name, email, password, occupation } = req.body;
@@ -24,7 +23,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-// Login
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -42,7 +41,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// Get User by ID
 exports.getUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -59,19 +57,16 @@ exports.getUser = async (req, res) => {
 exports.assignProject = async (req, res) => {
   try {
     const { userId, projectName } = req.body;
-
-    // Step 1: Find the project by name
     const project = await Project.findOne({ name: projectName });
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Step 2: Assign only the ObjectId
-    user.assignedProject = project._id;
+    
+    user.assignedProject = project._id;   //  Assign only the ObjectId
 
-    // Step 3 (optional): Save deadline date separately if needed
-    const assignedAt = new Date();
+    const assignedAt = new Date();      // Save deadline date separately if needed
     const deadlineAt = new Date(assignedAt.getTime() + project.deadlineDays * 24 * 60 * 60 * 1000);
     user.projectDeadline = deadlineAt;
     user.projectAssignedAt = assignedAt;
