@@ -1,19 +1,29 @@
-// // utils/projectList.js
-// const projects = [
-//   { name: 'Bug Tracker', description: 'Track and manage bugs efficiently.' },
-//   { name: 'E-learning Platform', description: 'Online course platform with user enrollment.' },
-//   { name: 'Job Board Platform', description: 'Post and search for jobs.' },
-//   { name: 'Mini CRM', description: 'Manage clients and sales leads.' },
-//   { name: 'File Storage System', description: 'Upload, store and download files.' },
-//   { name: 'Freelance Marketplace', description: 'Post gigs and hire freelancers.' },
-//   { name: 'Chat App', description: 'Real-time messaging between users.' },
-//   { name: 'Online Voting System', description: 'Create and participate in polls.' },
-//   { name: 'Inventory & Billing', description: 'Track stock and generate bills.' },
-//   { name: 'Event Registration', description: 'Register and manage event attendees.' }
-// ];
+const Project = require('../models/project'); // Assuming you have a Project model
 
-// const getAvailableProjects = () => {
-//   return projects;
-// };
+// Assign Project
+exports.assignProject = async (req, res) => {
+  try {
+    const { userId, projectName } = req.body;
+    
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-// module.exports = { getAvailableProjects };
+    // Find the project by its name
+    const project = await Project.findOne({ name: projectName });
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Assign the project to the user
+    user.assignedProject = project._id;  // Save the project ID
+    await user.save();
+
+    res.status(200).json({ message: 'Project assigned successfully' });
+  } catch (error) {
+    console.error('Assign Project Error:', error);
+    res.status(500).json({ message: 'Server error during project assignment' });
+  }
+};
