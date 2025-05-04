@@ -87,7 +87,6 @@ function Signup() {
             required
           />
 
-          {/* Role selection */}
           <select
             name="role"
             value={formData.role}
