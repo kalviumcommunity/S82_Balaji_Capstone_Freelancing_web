@@ -24,6 +24,7 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.get('/user/:userId', getUser);
 router.put('/assign-project', assignProject);
+
 router.get('/assigned-project/:userId', getAssignedProject);
 router.get('/projects', getAllProjects);
 router.get('/deadline/:projectName', getProjectDeadline);

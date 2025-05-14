@@ -4,7 +4,7 @@ const Project = require('../models/project');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Signup Controller
+// Signup 
 exports.signup = async (req, res) => {
   const { name, email, password, role, phone } = req.body;
 
@@ -36,7 +36,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-// Login Controller
+// Login 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -69,8 +69,7 @@ exports.getUser = async (req, res) => {
   }
 };
 
-// Assign Project
-// Assign Project - now using PUT
+// Assigning Project
 exports.assignProject = async (req, res) => {
   try {
     const { userId, projectName } = req.body;
@@ -98,7 +97,7 @@ exports.assignProject = async (req, res) => {
 };
 
 
-// Get Assigned Project
+//  Assigned Project
 exports.getAssignedProject = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).populate('assignedProject');
@@ -117,7 +116,7 @@ exports.getAssignedProject = async (req, res) => {
   }
 };
 
-// Get All Projects (Paginated)
+// All Projects 
 exports.getAllProjects = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -139,8 +138,7 @@ exports.getAllProjects = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-// Get Project Deadline
+// Project Deadline
 exports.getProjectDeadline = async (req, res) => {
   try {
     const projectName = decodeURIComponent(req.params.projectName);
@@ -156,7 +154,7 @@ exports.getProjectDeadline = async (req, res) => {
 };
 
 // Project Submission
-// Submit Project - now using PUT
+
 exports.submitProject = async (req, res) => {
   try {
     const githubLink = req.body.githubLink;
@@ -166,7 +164,7 @@ exports.submitProject = async (req, res) => {
       return res.status(400).json({ message: 'Please provide either a GitHub link or a ZIP file' });
     }
 
-    const user = await User.findById(req.userId); // from auth middleware
+    const user = await User.findById(req.userId);
     if (!user || !user.assignedProject) {
       return res.status(404).json({ message: 'User or assigned project not found' });
     }
