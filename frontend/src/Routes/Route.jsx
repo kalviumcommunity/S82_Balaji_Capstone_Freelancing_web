@@ -14,13 +14,12 @@ function Router() {
       <Route path="/" element={<Home />} />
       <Route path='/login' element={<Login />} />
       <Route path='/forgot-password' element={<ForgotPassword/>} />
-      <Route path='/assignment' element={<AssignProject/>}/>
+      <Route path='/ass' element={<AssignProject/>}/>
       <Route path="/submission" element={<SubmissionPage />} />
       <Route path='/signup' element={<Signup/>}/>
       <Route path="/verify-otp" element={<OtpVerification />} />
-      <Route path="/recruiter-dashboard" element={<RecruiterDashboard/>}/>
+      <Route path="/rec" element={<RecruiterDashboard/>}/>
     </Routes>
   )
 }
-
 export default Router

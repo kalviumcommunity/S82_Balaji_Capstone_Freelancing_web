@@ -20,7 +20,6 @@ function Login() {
         body: JSON.stringify(formData),
       });
 
-      // Check if the response is valid JSON
       let data;
       try {
         data = await res.json();
@@ -35,22 +34,22 @@ function Login() {
         return;
       }
 
-      // Check if user exists and if they have the correct role
-      if (data && data.user) {
-        const user = data.user;
+      if (data && data.token && data.user) {
+        const { token, user } = data;
+
+        // ✅ Store JWT token and user data in localStorage
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+
         if (user.role === 'freelancer') {
           if (user.assignedProject && user.assignedProject.status === 'passed') {
-            // Redirect to freelancer dashboard if project status is 'passed'
             navigate('/freelancer-dashboard');
           } else {
-            // Otherwise, redirect to submission page
             navigate('/submission');
           }
         } else if (user.role === 'recruiter') {
-          // Redirect to recruiter dashboard if role is 'recruiter'
           navigate('/recruiter-dashboard');
         } else {
-          // If the role is neither freelancer nor recruiter
           alert('Unknown role');
         }
       } else {

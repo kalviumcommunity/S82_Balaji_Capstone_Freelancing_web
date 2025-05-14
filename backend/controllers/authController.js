@@ -1,54 +1,65 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-// const Project = require('../models/project');
+const Project = require('../models/project');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET;
 
-
+// Signup Controller
 exports.signup = async (req, res) => {
-  try {
-    const { name, email, password, occupation } = req.body;
-    const existingUser = await User.findOne({ email });
+  const { name, email, password, role, phone } = req.body;
 
-    if (existingUser)
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      role,
+    });
 
-    const newUser = new User({ name, email, password: hashedPassword, occupation });
     await newUser.save();
 
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    console.error('Signup Error:', error);
-    res.status(500).json({ message: 'Server error during signup' });
+    const userWithoutPassword = await User.findById(newUser._id).select('-password');
+
+    const token = jwt.sign({ id: newUser._id }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(201).json({ user: userWithoutPassword, token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-
+// Login Controller
 exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-    
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
-    
-    const userWithoutPassword = user.toObject();
-    delete userWithoutPassword.password;
-    
-    res.status(200).json({ message: 'Login successful', user: userWithoutPassword });
-    
-  } catch (error) {
-    console.error('Login Error:', error);
-    res.status(500).json({ message: 'Server error during login' });
+
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(200).json({ user, token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
+// Get User
 exports.getUser = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const user = await User.findById(userId).select('-password');
+    const user = await User.findById(req.params.userId).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     res.json(user);
@@ -58,22 +69,24 @@ exports.getUser = async (req, res) => {
   }
 };
 
+// Assign Project
+// Assign Project - now using PUT
 exports.assignProject = async (req, res) => {
   try {
     const { userId, projectName } = req.body;
+
     const project = await Project.findOne({ name: projectName });
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    
-    user.assignedProject = project._id;   //  Assign only the ObjectId
-
-    const assignedAt = new Date();      // Save deadline date separately if needed
+    const assignedAt = new Date();
     const deadlineAt = new Date(assignedAt.getTime() + project.deadlineDays * 24 * 60 * 60 * 1000);
-    user.projectDeadline = deadlineAt;
+
+    user.assignedProject = project._id;
     user.projectAssignedAt = assignedAt;
+    user.projectDeadline = deadlineAt;
 
     await user.save();
 
@@ -88,11 +101,10 @@ exports.assignProject = async (req, res) => {
 // Get Assigned Project
 exports.getAssignedProject = async (req, res) => {
   try {
-    const { userId } = req.params;
-
-    const user = await User.findById(userId).populate('assignedProject');
-    if (!user || !user.assignedProject)
+    const user = await User.findById(req.params.userId).populate('assignedProject');
+    if (!user || !user.assignedProject) {
       return res.status(404).json({ message: 'No project assigned' });
+    }
 
     res.status(200).json({
       assignedProject: user.assignedProject,
@@ -105,4 +117,70 @@ exports.getAssignedProject = async (req, res) => {
   }
 };
 
+// Get All Projects (Paginated)
+exports.getAllProjects = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
 
+    const projects = await Project.find()
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const totalProjects = await Project.countDocuments();
+
+    res.json({
+      projects,
+      totalProjects,
+      totalPages: Math.ceil(totalProjects / limit),
+      currentPage: Number(page)
+    });
+  } catch (error) {
+    console.error('Get Projects Error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get Project Deadline
+exports.getProjectDeadline = async (req, res) => {
+  try {
+    const projectName = decodeURIComponent(req.params.projectName);
+
+    const project = await Project.findOne({ name: projectName });
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+
+    res.status(200).json({ deadlineDays: project.deadlineDays });
+  } catch (error) {
+    console.error('Get Deadline Error:', error);
+    res.status(500).json({ message: 'Server error while fetching deadline' });
+  }
+};
+
+// Project Submission
+// Submit Project - now using PUT
+exports.submitProject = async (req, res) => {
+  try {
+    const githubLink = req.body.githubLink;
+    const zipUrl = req.file ? req.file.path : null;
+
+    if (!githubLink && !zipUrl) {
+      return res.status(400).json({ message: 'Please provide either a GitHub link or a ZIP file' });
+    }
+
+    const user = await User.findById(req.userId); // from auth middleware
+    if (!user || !user.assignedProject) {
+      return res.status(404).json({ message: 'User or assigned project not found' });
+    }
+
+    user.submission = {
+      githubLink: githubLink || null,
+      zipUrl: zipUrl || null,
+      submittedAt: new Date()
+    };
+
+    await user.save();
+    res.status(200).json({ message: 'Project submitted successfully' });
+  } catch (error) {
+    console.error('Project Submission Error:', error);
+    res.status(500).json({ message: 'Server error during project submission' });
+  }
+};
