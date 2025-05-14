@@ -4,7 +4,7 @@ const Project = require('../models/project');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Signup 
+// Signup Controller
 exports.signup = async (req, res) => {
   const { name, email, password, role, phone } = req.body;
 
@@ -36,7 +36,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-// Login 
+// Login Controller
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -69,7 +69,8 @@ exports.getUser = async (req, res) => {
   }
 };
 
-// Assigning Project
+// Assign Project
+// Assign Project - now using PUT
 exports.assignProject = async (req, res) => {
   try {
     const { userId, projectName } = req.body;
@@ -97,7 +98,7 @@ exports.assignProject = async (req, res) => {
 };
 
 
-//  Assigned Project
+// Get Assigned Project
 exports.getAssignedProject = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).populate('assignedProject');
@@ -116,7 +117,7 @@ exports.getAssignedProject = async (req, res) => {
   }
 };
 
-// All Projects 
+// Get All Projects (Paginated)
 exports.getAllProjects = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -138,7 +139,8 @@ exports.getAllProjects = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-// Project Deadline
+
+// Get Project Deadline
 exports.getProjectDeadline = async (req, res) => {
   try {
     const projectName = decodeURIComponent(req.params.projectName);
@@ -154,7 +156,7 @@ exports.getProjectDeadline = async (req, res) => {
 };
 
 // Project Submission
-
+// Submit Project - now using PUT
 exports.submitProject = async (req, res) => {
   try {
     const githubLink = req.body.githubLink;
@@ -164,7 +166,7 @@ exports.submitProject = async (req, res) => {
       return res.status(400).json({ message: 'Please provide either a GitHub link or a ZIP file' });
     }
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId); // from auth middleware
     if (!user || !user.assignedProject) {
       return res.status(404).json({ message: 'User or assigned project not found' });
     }
