@@ -1,116 +1,115 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode'; // for decoding JWT
 import './submission.css';
 
 function SubmissionPage() {
-  const [assignedProject, setAssignedProject] = useState(null);
-  const [timeLeft, setTimeLeft] = useState('');
   const [githubLink, setGithubLink] = useState('');
   const [zipFile, setZipFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/api/assigned-project');
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`❌ Status ${res.status}: ${errorText}`);
-        }
+  // Get user and token from localStorage
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
+  const userId = user ? user._id : null;
+  const projectId = user?.assignedProject || '';
 
-        const data = await res.json();
-
-        if (!data || !data.assignedProject) {
-          throw new Error('No assigned project in response');
-        }
-
-        setAssignedProject(data.assignedProject);
-        startTimer(data.assignedProject.deadline);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('🚨 Failed to load assigned project:', err.message);
-        setIsLoading(false);
-      }
-    };
-
-    fetchProject();
-  }, []);
-
-  const startTimer = (deadlineDate) => {
-    const endTime = new Date(deadlineDate).getTime();
-
-    const timer = setInterval(() => {
-      const now = Date.now();
-      const distance = endTime - now;
-
-      if (distance <= 0) {
-        clearInterval(timer);
-        setTimeLeft('⛔ Time’s up!');
-      } else {
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((distance / (1000 * 60)) % 60);
-        const seconds = Math.floor((distance / 1000) % 60);
-        setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
-      }
-    }, 1000);
+  // Decode token to check for expiration
+  const isTokenExpired = () => {
+    if (!token) return true; // No token present
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Get current time in seconds
+      return decoded.exp < currentTime;
+    } catch (err) {
+      return true; // Token is malformed or invalid
+    }
   };
 
   const handleSubmit = async () => {
     if (!githubLink && !zipFile) {
-      alert('Please provide either a GitHub link or upload a ZIP file');
+      setError('Please upload a ZIP file or provide a GitHub link');
       return;
     }
 
+    if (!userId || !projectId || !token) {
+      setError('User not logged in, project not assigned, or token missing');
+      return;
+    }
+
+    if (isTokenExpired()) {
+      setError('Your session has expired. Please log in again.');
+      return;
+    }
+
+    setError('');
     const formData = new FormData();
-    if (githubLink) formData.append('githubLink', githubLink);
-    if (zipFile) formData.append('zipFile', zipFile);
+    formData.append('userId', userId);
+    formData.append('projectId', projectId);
+
+    if (githubLink) {
+      formData.append('githubLink', githubLink);
+    }
+
+    if (zipFile) {
+      formData.append('zipFile', zipFile);
+    }
 
     try {
-      const res = await fetch('http://localhost:5000/api/submit-project', {
+      const response = await fetch('http://localhost:5000/api/submit-project', {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`, // Send JWT
+        },
       });
 
-      const data = await res.json();
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || 'Something went wrong');
+      }
 
-      if (!res.ok) throw new Error(data.message || 'Submission failed');
+      const data = await response.json();
+      console.log('Submitted:', data);
 
-      alert('Project submitted successfully');
-    } catch (error) {
-      console.error('Submission error:', error);
-      alert('Error during submission: ' + error.message);
+      setSuccessMessage('✅ Project submitted successfully!');
+      setTimeout(() => navigate('/'), 2000);
+    } catch (err) {
+      console.error('Submission failed:', err);
+      setError('❌ Submission failed: ' + err.message);
     }
   };
 
-  if (isLoading) {
-    return <p>Loading your assigned project...</p>;
-  }
-
   return (
     <div className="submission-container">
-      <h2>Submit Your {assignedProject.name} Project</h2>
-      <p>Time left to submit: {timeLeft}</p>
-      <div className="submission-options">
-        <div>
-          <label>GitHub Link (Optional)</label>
-          <input
-            type="url"
-            value={githubLink}
-            onChange={(e) => setGithubLink(e.target.value)}
-            placeholder="Enter your GitHub repository link"
-          />
-        </div>
+      <h2>📦 Submit Your Project</h2>
+      <p><strong>Project:</strong> {projectId}</p>
 
-        <div>
-          <label>Upload ZIP (Optional)</label>
-          <input
-            type="file"
-            onChange={(e) => setZipFile(e.target.files[0])}
-          />
-        </div>
+      {error && <p className="error">{error}</p>}
+      {successMessage && <p className="success">{successMessage}</p>}
+
+      <div className="submission-form">
+        <label>GitHub Link:</label>
+        <input
+          type="url"
+          value={githubLink}
+          onChange={e => setGithubLink(e.target.value)}
+          placeholder="https://github.com/yourrepo"
+        />
+
+        <label>Upload ZIP File:</label>
+        <input
+          type="file"
+          accept=".zip"
+          onChange={e => setZipFile(e.target.files[0])}
+        />
+
+        <button className="submit-btn" onClick={handleSubmit}>
+          Submit Project
+        </button>
       </div>
-
-      <button onClick={handleSubmit}>Submit Project</button>
     </div>
   );
 }

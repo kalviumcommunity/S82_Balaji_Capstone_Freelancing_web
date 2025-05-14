@@ -1,18 +1,22 @@
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
+const JWT_SECRETS = process.env.JWT_SECRET; // ideally from process.env
 
-// const authMiddleware = (req, res, next) => {
-//   const token = req.header('Authorization')?.replace('Bearer ', '');
+const auth = (req, res, next) => {
+  const authHeader = req.header('Authorization');
 
-//   if (!token) return res.status(401).json({ message: 'No token, authorization denied' });
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'No or malformed token provided' });
+  }
 
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     req.user = decoded;
-//     next();
-//   } catch (error) {
-//     console.error('Token verification failed:', error);
-//     res.status(401).json({ message: 'Invalid token' });
-//   }
-// };
+  const token = authHeader.split(' ')[1]; // 👈 Extract the actual token
 
-// module.exports = authMiddleware;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.id; // or decoded.user._id depending on your token payload
+    next();
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
+
+module.exports = auth;
