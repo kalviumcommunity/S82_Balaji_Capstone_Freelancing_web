@@ -4,8 +4,23 @@ meta {
   seq: 2
 }
 
+post {
+  url: https://s82-balaji-capstone-freelancing-web-dpv8.onrender.com/api/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "bjhdsnxb@community.com",
+    "password": "strongpassword123"
+   
+  }
+}
+
 get {
   url: http://localhost:5000/api/user/6819d5c24708de717d2943cd
   body: json
   auth: inherit
 }
+
