@@ -62,7 +62,7 @@ function SubmissionPage() {
         method: 'POST',
         body: formData,
         headers: {
-          Authorization: `Bearer ${token}`, // Send JWT
+          Authorization: `Bearer ${token}`, 
         },
       });
 
@@ -74,11 +74,11 @@ function SubmissionPage() {
       const data = await response.json();
       console.log('Submitted:', data);
 
-      setSuccessMessage('✅ Project submitted successfully!');
-      setTimeout(() => navigate('/'), 2000);
+      setSuccessMessage(' Project submitted successfully!');
+      setTimeout(() => navigate('/freelance-das'), 2000);
     } catch (err) {
       console.error('Submission failed:', err);
-      setError('❌ Submission failed: ' + err.message);
+      setError(' Submission failed: ' + err.message);
     }
   };
 
