@@ -41,7 +41,7 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate('assignedProject');
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -49,7 +49,11 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
 
-    res.status(200).json({ user, token });
+    // Remove password before sending
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.status(200).json({ user: userObj, token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -160,6 +164,7 @@ exports.submitProject = async (req, res) => {
     const githubLink = req.body.githubLink;
     const zipUrl = req.file ? req.file.path : null;
 
+    if (!req.userId) return res.status(401).json({ message: 'Unauthorized' });
     if (!githubLink && !zipUrl) {
       return res.status(400).json({ message: 'Please provide either a GitHub link or a ZIP file' });
     }
@@ -172,7 +177,7 @@ exports.submitProject = async (req, res) => {
     user.submission = {
       githubLink: githubLink || null,
       zipUrl: zipUrl || null,
-      submittedAt: new Date()
+      submittedAt: new Date(),
     };
 
     await user.save();
@@ -182,3 +187,67 @@ exports.submitProject = async (req, res) => {
     res.status(500).json({ message: 'Server error during project submission' });
   }
 };
+
+
+// controllers/userController.js
+
+exports.updateProfilePic = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const profilePic = req.file?.filename;
+
+    if (!profilePic) {
+      return res.status(400).json({ message: 'No profile picture uploaded.' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { profilePic },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.status(200).json({ message: 'Profile picture updated', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+
+exports.postProject = async (req, res) => {
+  try {
+    console.log('Incoming project data:', req.body);
+      const { title, description, budget, deadline } = req.body;
+
+    if (!title || !description || !budget || !deadline) {
+      return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    const newProject = new Project({
+      title,
+      description,
+      budget,
+      deadline,
+      createdAt: new Date(),
+    });
+
+    await newProject.save();
+
+    return res.status(201).json({ message: 'Project posted successfully!' });
+  } catch (error) {
+    console.error('Detailed error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.freelance = async(req,res)=>{
+  try{
+    const freelancer=await User.find({role:'freelancer'}).select("-password");
+    res.status(200).json(freelancer)
+  }
+  catch(err){
+    res.status(500).json({error:err.message});
+  }
+}

@@ -8,8 +8,12 @@ const {
   getAssignedProject,
   getAllProjects,
   getProjectDeadline,
-  submitProject
+  submitProject,
+ updateProfilePic, 
+ freelance,
+  postProject
 } = require('../controllers/authController');
+const userController = require('../controllers/userController');
 const upload = require('../middleware/upload'); // the multer config file
 const auth = require('../middleware/auth');
 router.post(
@@ -19,14 +23,18 @@ router.post(
   submitProject
 );
 
+router.post('/update-profile-pic/:userId', upload.single('profilePic'),updateProfilePic);
+
+
+router.get('/freelancers', freelance);
 
 router.post('/signup', signup);
 router.post('/login', login);
 router.get('/user/:userId', getUser);
 router.put('/assign-project', assignProject);
-
+router.post('/projects', postProject);
 router.get('/assigned-project/:userId', getAssignedProject);
 router.get('/projects', getAllProjects);
 router.get('/deadline/:projectName', getProjectDeadline);
-
+router.delete('/users/:id', userController.deleteUser);
 module.exports = router;
