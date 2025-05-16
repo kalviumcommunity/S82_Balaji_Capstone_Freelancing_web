@@ -38,7 +38,16 @@ const userSchema = new mongoose.Schema({
   githubLink: { type: String, default: null },
   zipUrl: { type: String, default: null },
   submittedAt: { type: Date }
+},
+projectSubmitted: {
+  type: Boolean,
+  default: false
+},
+profilePicUrl: {
+  type: String,
+  default: null,
 }
+
 
 });
 

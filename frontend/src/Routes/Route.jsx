@@ -7,6 +7,8 @@ import ForgotPassword from '../Components/forgot/forgot'
 import AssignProject from '../Components/project/Assignment'
 import SubmissionPage from '../Components/project/ Submission'
 import RecruiterDashboard from '../role/recruiter/recruiter'
+import FreelancerDashboard from '../role/freelance/freelancer'
+import UpdatePassword from '../role/password'
 function Router() {
   return (
     <Routes>
@@ -16,7 +18,9 @@ function Router() {
       <Route path='/ass' element={<AssignProject/>}/>
       <Route path="/submission" element={<SubmissionPage />} />
       <Route path='/signup' element={<Signup/>}/>
-      <Route path="/rec" element={<RecruiterDashboard/>}/>
+      <Route path="/recruiter-dashboard" element={<RecruiterDashboard/>}/>
+      <Route path='/freelancer-dashboard' element={< FreelancerDashboard/>} />
+      <Route path='/password' element={<UpdatePassword/>} />
     </Routes>
   )
 }

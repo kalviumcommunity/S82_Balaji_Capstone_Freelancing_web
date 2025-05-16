@@ -24,8 +24,8 @@ function Login() {
       try {
         data = await res.json();
       } catch (err) {
-        console.error('Error parsing response JSON:', err);
-        alert('Failed to process the response. Please try again.');
+        console.error('Error parsing JSON:', err);
+        alert('Invalid response from server.');
         return;
       }
 
@@ -34,37 +34,41 @@ function Login() {
         return;
       }
 
-      if (data && data.token && data.user) {
-        const { token, user } = data;
+      const { token, user } = data;
 
-        // ✅ Store JWT token and user data in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-
-        if (user.role === 'freelancer') {
-          if (user.assignedProject && user.assignedProject.status === 'passed') {
-            navigate('/freelancer-dashboard');
-          } else {
-            navigate('/submission');
-          }
-        } else if (user.role === 'recruiter') {
-          navigate('/recruiter-dashboard');
-        } else {
-          alert('Unknown role');
-        }
-      } else {
-        alert('Failed to find user data');
+      if (!token || !user) {
+        alert('Login successful, but user data is missing.');
+        return;
       }
+
+      // Store token and user in localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      if (user.role === 'freelancer') {
+        const hasSubmitted = user.submission && (user.submission.githubLink || user.submission.zipUrl);
+        if (hasSubmitted) {
+          navigate('/freelancer-dashboard');
+        } else {
+          navigate('/submission');
+        }
+      } else if (user.role === 'recruiter') {
+        navigate('/recruiter-dashboard');
+      } else {
+        alert('Unknown user role.');
+      }
+
+
     } catch (err) {
       console.error('Login error:', err);
-      alert('Something went wrong');
+      alert('Something went wrong. Please try again.');
     }
   };
 
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        <h2>Welcome Back</h2> 
+        <h2>Welcome Back</h2>
         <form onSubmit={handleLogin} className="auth-form">
           <input
             name="email"
