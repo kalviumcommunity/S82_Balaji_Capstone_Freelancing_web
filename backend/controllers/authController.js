@@ -251,3 +251,36 @@ exports.freelance = async(req,res)=>{
     res.status(500).json({error:err.message});
   }
 }
+// In your controller
+exports.updatePassword = async (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const userId = req.userId;  // <-- get userId from JWT auth middleware
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ message: 'New passwords do not match' });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Update Password Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+

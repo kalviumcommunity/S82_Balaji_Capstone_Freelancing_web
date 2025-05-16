@@ -11,6 +11,7 @@ const {
   submitProject,
  updateProfilePic, 
  freelance,
+ updatePassword,
   postProject
 } = require('../controllers/authController');
 const userController = require('../controllers/userController');
@@ -37,4 +38,5 @@ router.get('/assigned-project/:userId', getAssignedProject);
 router.get('/projects', getAllProjects);
 router.get('/deadline/:projectName', getProjectDeadline);
 router.delete('/users/:id', userController.deleteUser);
+router.put('/update-password/:userId',updatePassword);
 module.exports = router;
