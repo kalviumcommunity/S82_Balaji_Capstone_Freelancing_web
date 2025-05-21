@@ -1,5 +1,10 @@
 # Freelancing Platform
 
+## Backend  server deployed link: **
+
+https://s82-balaji-capstone-freelancing-web-dpv8.onrender.com
+
+
 ## Project Title: **Freelancing Platform**
 
 ## Project Idea:
